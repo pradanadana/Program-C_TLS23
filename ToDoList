@@ -1,0 +1,215 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+using namespace std;
+
+// Struktur untuk menyimpan detail tugas
+struct Task {
+    string hari;
+    string jenis;
+    string namaTugas;
+    string deadline;
+    string mataKuliah;
+};
+
+// Fungsi untuk menyimpan daftar tugas ke file
+void simpanDaftarTugasKeFile(Task* daftarTugas, int jumlahTugas) {
+    ofstream file("todolist.txt"); // Buka file untuk penulisan (file akan ditimpa)
+    if (file.is_open()) {
+        for (int i = 0; i < jumlahTugas; i++) {
+            file << daftarTugas[i].hari << "\t" << daftarTugas[i].jenis << "\t" << daftarTugas[i].namaTugas << "\t" << daftarTugas[i].deadline << "\t" << daftarTugas[i].mataKuliah << endl;
+        }
+        file.close(); // Tutup file
+    } else {
+        cout << "Gagal membuka file untuk penulisan." << endl;
+    }
+}
+
+// Fungsi untuk memuat daftar tugas dari file
+void muatDaftarTugasDariFile(Task*& daftarTugas, int& jumlahTugas) {
+    ifstream file("todolist.txt");
+    if (file.is_open()) {
+        Task tugas;
+        int kapasitas = 10; // Ukuran awal array dinamis
+        daftarTugas = new Task[kapasitas]; // Alokasi memori untuk array dinamis
+        while (file >> tugas.hari >> tugas.jenis >> tugas.namaTugas >> tugas.deadline >> tugas.mataKuliah) {
+            // Periksa apakah perlu mengalokasikan lebih banyak memori
+            if (jumlahTugas == kapasitas) {
+                kapasitas *= 2; // Gandakan kapasitas
+                Task* temp = new Task[kapasitas]; // Alokasi memori baru
+                for (int i = 0; i < jumlahTugas; i++) {
+                    temp[i] = daftarTugas[i]; // Salin data lama
+                }
+                delete[] daftarTugas; // Hapus memori lama
+                daftarTugas = temp; // Gunakan memori baru
+            }
+            daftarTugas[jumlahTugas] = tugas; // Tambahkan tugas ke daftar
+            jumlahTugas++;
+        }
+        file.close(); // Tutup file
+    } else {
+        cout << "File daftar tugas tidak ditemukan atau gagal dibuka." << endl;
+    }
+}
+
+int main() {
+    Task* toDoList = nullptr; // Pointer ke array tugas
+    int jumlahTugas = 0; 
+
+    int pilihan;
+
+    cout << "Selamat datang di Aplikasi To-Do List!" << endl;
+    muatDaftarTugasDariFile(toDoList, jumlahTugas);
+    do {
+        cout << "\nMenu:" << endl;
+        cout << "1. Tambah Tugas" << endl;
+        cout << "2. Tampilkan To-Do List" << endl;
+        cout << "3. Hapus Tugas" << endl;
+        cout << "4. Keluar" << endl; 
+        cout << "Pilih opsi (1/2/3/4): ";
+        cin >> pilihan;
+
+        switch (pilihan) {
+            case 1: {
+                Task tugasBaru;
+
+                cout << "Masukkan Hari: ";
+                cin >> tugasBaru.hari;
+
+                cout << "Pilih Jenis Tugas (1/2):" << endl;
+                string jenisTugas[] = {
+                    "Tugas Kuliah", "Lainnya"
+                };
+
+                int kodeJenisTugas;
+                do {
+                    for (int i = 0; i < 2; i++) {
+                        cout << i + 1 << ". " << jenisTugas[i] << endl;
+                    }
+                    cin >> kodeJenisTugas;
+
+                    if (kodeJenisTugas < 1 || kodeJenisTugas > 2) {
+                        cout << "Pilihan jenis tugas tidak valid. Silakan coba lagi." << endl;
+                    } else {
+                        cin.ignore();
+                    }
+                } while (kodeJenisTugas < 1 || kodeJenisTugas > 2);
+
+                if (kodeJenisTugas == 2) {
+                    cout << "Masukkan Jenis Tugas: ";
+                    getline(cin, tugasBaru.jenis);
+                } else {
+                    tugasBaru.jenis = jenisTugas[0];
+                }
+                
+
+            if (kodeJenisTugas == 1){
+                // Menampilkan daftar mata kuliah yang tersedia
+                cout << "Pilih Mata Kuliah (1-7):" << endl;
+                string mataKuliah[] = {
+                    "Matematika", "Fisika", "Kimia", "Bahasa Inggris", "Sejarah", "Biologi", "Komputer"
+                };
+
+                int kodeMataKuliah;
+                    do {
+                    for (int i = 0; i < 7; i++) {
+                        cout << i + 1 << ". " << mataKuliah[i] << endl;
+                    }
+                    cin >> kodeMataKuliah;
+
+                    if (kodeMataKuliah < 1 || kodeMataKuliah > 7) {
+                        cout << "Pilihan mata kuliah tidak valid. Silakan coba lagi." << endl;
+                    } else {
+                        cin.ignore();
+                        }
+                } while (kodeMataKuliah < 1 || kodeMataKuliah > 7);
+
+
+                 // Mengonversi kode mata kuliah ke nama mata kuliah
+                tugasBaru.mataKuliah = mataKuliah[kodeMataKuliah - 1];
+            }
+
+                cout << "Masukkan Nama Tugas: ";
+                getline(cin, tugasBaru.namaTugas);
+
+                cout << "Masukkan Deadline: ";
+                int tanggal, bulan, tahun;
+                cout << "Masukkan Tanggal (1-31): ";
+                cin >> tanggal;
+                cout << "Masukkan Bulan (1-12): ";
+                cin >> bulan;
+                cout << "Masukkan Tahun: ";
+                cin >> tahun;
+                tugasBaru.deadline = to_string(tanggal) + "/" + to_string(bulan) + "/" + to_string(tahun);
+
+                // Menambahkan tugas ke daftar
+                Task* temp = new Task[jumlahTugas + 1]; // Alokasi memori baru
+                for (int i = 0; i < jumlahTugas; i++) {
+                    temp[i] = toDoList[i]; // Salin data lama
+                }
+                temp[jumlahTugas] = tugasBaru; // Tambahkan tugas baru
+                delete[] toDoList; // Hapus memori lama
+                toDoList = temp; // Gunakan memori baru
+                jumlahTugas++;
+
+                cout << "Tugas berhasil ditambahkan!" << endl;
+                break;
+            }
+        
+
+            case 2:
+                cout << "\nTo-Do List Anda:" << endl;
+                for (int i = 0; i < jumlahTugas; ++i) {
+                    cout << "Tugas " << (i + 1) << ":" << endl;
+                    cout << "Hari: " << toDoList[i].hari << endl;
+                    cout << "Jenis Tugas: " << toDoList[i].jenis << endl;
+
+                    if (toDoList[i].jenis == "Tugas Kuliah") {
+                        cout << "Mata Kuliah: " << toDoList[i].mataKuliah << endl;
+                    }
+
+                    cout << "Jadwal: " << toDoList[i].namaTugas << endl;
+                    cout << "Deadline: " << toDoList[i].deadline << endl;
+                    cout << "-------------------------" << endl;
+                }
+                break;
+
+            case 3:
+            simpanDaftarTugasKeFile(toDoList, jumlahTugas);
+                int nomorTugasHapus;
+                cout << "Masukkan nomor tugas yang ingin dihapus: ";
+                cin >> nomorTugasHapus;
+
+                if (nomorTugasHapus >= 1 && nomorTugasHapus <= jumlahTugas) {
+                 // Hapus tugas dengan menggeser elemen-elemen array jika perlu
+                for (int i = nomorTugasHapus - 1; i < jumlahTugas - 1; i++) {
+                   toDoList[i] = toDoList[i + 1];
+                }
+                jumlahTugas--;
+
+                // Alokasi memori baru untuk array tugas yang lebih kecil
+                Task* temp = new Task[jumlahTugas];
+                for (int i = 0; i < jumlahTugas; i++) {
+                     temp[i] = toDoList[i];
+                }
+                delete[] toDoList;
+                toDoList = temp;
+
+                cout << "Tugas berhasil dihapus!" << endl;
+                } else {
+                cout << "Nomor tugas tidak valid. Silakan coba lagi." << endl;
+                }
+                break;
+
+            case 4:
+                cout << "Terima kasih telah menggunakan Aplikasi To-Do List!" << endl;
+                delete[] toDoList; // Hapus memori yang dialokasikan sebelum keluar
+                break;
+
+            default:
+                cout << "Opsi tidak valid. Silakan pilih lagi." << endl;
+        }
+    } while (pilihan != 4);
+
+    return 0;
+}
